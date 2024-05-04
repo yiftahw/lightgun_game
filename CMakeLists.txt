@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
 project(lightgun_game)
 
 set(PRJ_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRC_DIR ${PRJ_ROOT}/src)
 set(INC_DIR ${PRJ_ROOT}/inc)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PRJ_ROOT}/cmake)
 
 # vs code intellisense support
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -27,8 +28,13 @@ else()
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
 endif()
 
+# add the cpr library
+find_package(cpr REQUIRED)
+
+# define the lightgun_game executable
 set(APP_SRCS
     ${SRC_DIR}/screen.cpp
+    ${SRC_DIR}/http_client.cpp
     ${SRC_DIR}/main.cpp)
 
 set(APP_INC_DIRS
@@ -44,4 +50,4 @@ if(TARGET SDL2::SDL2main)
 endif()
 
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
-target_link_libraries(lightgun_game PRIVATE SDL2::SDL2-static)
+target_link_libraries(lightgun_game PRIVATE cpr::cpr SDL2::SDL2-static)
