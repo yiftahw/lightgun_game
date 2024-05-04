@@ -12,6 +12,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # c++ revision
 set(CXX_STANDARD 17)
 
+# use flags error, all, extra, pedantic
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
+
 # Create an option to switch between a system sdl library and a vendored sdl library
 option(MYGAME_VENDORED "Use vendored libraries" OFF)
 if(MYGAME_VENDORED)

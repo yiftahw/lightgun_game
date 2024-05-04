@@ -2,17 +2,20 @@
 
 #include <SDL2/SDL.h>
 #include <vector>
+#include <string>
 
 struct point2d
 {
     float x;
     float y;
+
+    std::string to_string() const;
 };
 
 class Screen
 {
 public:
-    static Screen *create(const char *title, int width, int height);
+    static Screen *create(const char *title, int width, int height, float scale = 1.0f);
     ~Screen();
 
     void add_pixel(point2d point);
