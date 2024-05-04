@@ -1,7 +1,10 @@
+#include <thread>
 #include <stdio.h>
 #include <iostream>
 #include <SDL2/SDL.h>
+#include "http_client.h"
 #include "screen.h"
+#include "Snapshot.h"
 
 static inline constexpr int screen_width = 800;
 static inline constexpr int screen_height = 800;
@@ -14,7 +17,7 @@ static_assert(effective_scale <= 1.0f, "Effective scale must be less than or equ
 static_assert(screen_scale >= 1.0f, "Screen scale must be greater than or equal to 1.0f");
 
 
-point2d map_dfrobot(int32_t x, int32_t y)
+point2d map_dfrobot(uint16_t x, uint16_t y)
 {
     constexpr float scaled_width = (screen_width / screen_scale);
     constexpr float scaled_height = (screen_height / screen_scale);
@@ -31,10 +34,13 @@ point2d map_dfrobot(int32_t x, int32_t y)
     float x_mapped = x_min + ((static_cast<float>(x) / static_cast<float>(dfrobot_max_unit)) * effective_width);
     float y_mapped = y_min + ((static_cast<float>(y) / static_cast<float>(dfrobot_max_unit)) * effective_height);
 
+    // to make the y axis go from top to bottom, we need to invert it
+    y_mapped = effective_height - y_mapped;
+
     return {x_mapped, y_mapped};
 }
 
-void example()
+void test()
 {
     auto screen = Screen::create("Hello, World!", screen_width, screen_height, screen_scale);
     if (screen == nullptr)
@@ -43,13 +49,19 @@ void example()
         return;
     }
 
-    screen->add_pixel(map_dfrobot(0, 0));
-    screen->add_pixel(map_dfrobot(0, 1023));
-    screen->add_pixel(map_dfrobot(1023, 0));
-    screen->add_pixel(map_dfrobot(1023, 1023));
+    HTTPClient client("10.100.102.34:80");
 
     while (true)
     {
+        screen->clear_pixels();
+
+        std::string data = client.get_data();
+        auto snapshot = parsePoints(data);
+        for (const auto &point : snapshot.points)
+        {
+            screen->add_pixel(map_dfrobot(point.x, point.y));
+        }
+
         screen->render_screen();
         screen->input();
     }
@@ -62,7 +74,7 @@ int main(int argc, char** argv)
     // to bypass the "unused parameter" warning from "Werror" flag, we can use this line
     if (argc == 0 && argv == nullptr) {}
 
-    example();
+    test();
 
     return 0;
 }
