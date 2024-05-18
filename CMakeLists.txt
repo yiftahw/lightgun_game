@@ -34,7 +34,10 @@ find_package(cpr REQUIRED)
 # define the lightgun_game executable
 set(APP_SRCS
     ${SRC_DIR}/screen.cpp
-    ${SRC_DIR}/http_client.cpp
+    ${SRC_DIR}/Snapshot.cpp
+    ${SRC_DIR}/DataAcqHTTP.cpp
+    ${SRC_DIR}/PointMapping.cpp
+    ${SRC_DIR}/DataAcqSim.cpp
     ${SRC_DIR}/main.cpp)
 
 set(APP_INC_DIRS

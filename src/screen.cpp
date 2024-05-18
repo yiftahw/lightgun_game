@@ -51,7 +51,15 @@ void Screen::render_screen()
 {
     clear_screen();
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderDrawPointsF(renderer, points.data(), points.size());
+    //SDL_RenderDrawPointsF(renderer, points.data(), points.size());
+    for (const auto &point : points)
+    {
+        // create a rectangle of size 20x20 and fill it with white color
+        SDL_FRect rect = {point.x - 10, point.y - 10, 20, 20};
+        SDL_RenderFillRectF(renderer, &rect);
+    }
+
+
     SDL_RenderPresent(renderer);
 }
 

@@ -5,6 +5,11 @@ std::string Point::to_string() const
     return "(" + std::to_string(x) + "," + std::to_string(y) + ")";
 }
 
+std::string PointF::to_string() const
+{
+    return "(" + std::to_string(x) + "," + std::to_string(y) + ")";
+}
+
 Point point_from_string(const std::string &str)
 {
     Point p;

@@ -13,6 +13,14 @@ struct Point
     std::string to_string() const;
 };
 
+struct PointF
+{
+    float x;
+    float y;
+
+    std::string to_string() const;
+};
+
 Point point_from_string(const std::string &str);
 
 struct Snapshot
