@@ -1,10 +1,5 @@
 #include "screen.h"
 
-std::string point2d::to_string() const
-{
-    return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
-}
-
 Screen::Screen(SDL_Window *window, SDL_Renderer *renderer) : window(window), renderer(renderer)
 {
 }
@@ -36,7 +31,7 @@ Screen *Screen::create(const char *title, int width, int height, float scale)
     return new Screen(window, renderer);
 }
 
-void Screen::add_pixel(point2d point)
+void Screen::add_pixel(SDL_FPoint point)
 {
     points.push_back(point);
 }
@@ -55,12 +50,8 @@ void Screen::clear_screen()
 void Screen::render_screen()
 {
     clear_screen();
-
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    for (const point2d &point : points)
-    {
-        SDL_RenderDrawPointF(renderer, point.x, point.y);
-    }
+    SDL_RenderDrawPointsF(renderer, points.data(), points.size());
     SDL_RenderPresent(renderer);
 }
 
