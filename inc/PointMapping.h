@@ -14,4 +14,9 @@ struct screen_constants
     }
 };
 
+/** @brief map a dfrobot camera snapshot to a cursor position */
 PointF map_snapshot_to_screen(const Snapshot& snapshot, const screen_constants &screen_consts);
+
+/** @brief map a point from the dfrobot coordinate system to the screen coordinate system
+  * @note this function is used for debugging purposes (Showing the 4 dfrobot points on the screen) */ 
+PointF map_dfrobot_to_screen(const Point &dfrobot, const screen_constants &screen_consts);

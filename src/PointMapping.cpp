@@ -4,17 +4,6 @@
 
 namespace
 {
-    // PointF map_dfrobot_to_screen(uint16_t x, uint16_t y, const screen_constants &constants)
-    // {
-    //     float x_mapped = ((static_cast<float>(x) * constants.effective_width) / dfrobot_max_unit);
-    //     float y_mapped = ((static_cast<float>(y) * constants.effective_height) / dfrobot_max_unit);
-
-    //     // to make the y axis go from top to bottom, we need to invert it
-    //     y_mapped = constants.effective_height - y_mapped;
-
-    //     return {x_mapped, y_mapped};
-    // }
-
     PointF map(const Snapshot &snapshot, const screen_constants &screen_consts)
     {
         PointF result;
@@ -125,4 +114,15 @@ PointF map_snapshot_to_screen(const Snapshot &snapshot, const screen_constants &
         printf("Error: %s\n", e.what());
     }
     return point;
+}
+
+PointF map_dfrobot_to_screen(const Point &point, const screen_constants &constants)
+{
+    float x_mapped = ((static_cast<float>(point.x) * constants.effective_width) / dfrobot_max_unit);
+    float y_mapped = ((static_cast<float>(point.y) * constants.effective_height) / dfrobot_max_unit);
+
+    // to make the y axis go from top to bottom, we need to invert it
+    y_mapped = constants.effective_height - y_mapped;
+
+    return {x_mapped, y_mapped};
 }

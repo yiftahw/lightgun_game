@@ -14,3 +14,5 @@ static inline constexpr double screen_ratio_width = 16;
 static inline constexpr double screen_ratio_height = 9;
 static inline constexpr float screen_width_cm = 59.8;
 static inline constexpr float screen_height_cm = 33.6;
+
+static inline constexpr uint8_t snapshot_size = 4;

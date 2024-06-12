@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <sstream>
+#include "consts.h"
 
 struct Point
 {
@@ -25,7 +26,7 @@ Point point_from_string(const std::string &str);
 
 struct Snapshot
 {
-    std::array<Point, 4> points;
+    std::array<Point, snapshot_size> points;
 
     std::string to_string() const;
 };
