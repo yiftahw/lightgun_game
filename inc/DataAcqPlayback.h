@@ -11,6 +11,7 @@ public:
     ~DataAcqPlayback();
 
     Snapshot get() override;
+    bool is_open();
 
 private:
     std::ifstream input;

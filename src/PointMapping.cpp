@@ -10,9 +10,9 @@ namespace
 
         // calculate the 2 axis of the screen relative to the IR camera
         // init the 4 points to their minimum values
-        PointF top_left = {dfrobot_max_unit, dfrobot_max_unit};
-        PointF top_right = {0, dfrobot_max_unit};
-        PointF bottom_left = {dfrobot_max_unit, 0};
+        PointF top_left = {dfrobot_max_unit_x, dfrobot_max_unit_y};
+        PointF top_right = {0, dfrobot_max_unit_y};
+        PointF bottom_left = {dfrobot_max_unit_x, 0};
         PointF bottom_right = {0, 0};
 
         for (const auto &tmp : snapshot.points)
@@ -68,7 +68,7 @@ namespace
 
         // we can create 2 axis of the screen relative to the IR camera
         // we need to calculate where the IR Camera mid point {(511.5, 511.5)} is relative to the 2 axis
-        constexpr PointF ir_camera_mid = {float(dfrobot_max_unit) / 2, float(dfrobot_max_unit) / 2};
+        constexpr PointF ir_camera_mid = {float(dfrobot_max_unit_x) / 2, float(dfrobot_max_unit_y) / 2};
 
         // get the intersection point of the camera mid point with the screen axis
         float n_left_mid = ir_camera_mid.y - (m_left * ir_camera_mid.x);
@@ -118,8 +118,8 @@ PointF map_snapshot_to_screen(const Snapshot &snapshot, const screen_constants &
 
 PointF map_dfrobot_to_screen(const Point &point, const screen_constants &constants)
 {
-    float x_mapped = ((static_cast<float>(point.x) * constants.effective_width) / dfrobot_max_unit);
-    float y_mapped = ((static_cast<float>(point.y) * constants.effective_height) / dfrobot_max_unit);
+    float x_mapped = ((static_cast<float>(point.x) * constants.effective_width) / dfrobot_max_unit_x);
+    float y_mapped = ((static_cast<float>(point.y) * constants.effective_height) / dfrobot_max_unit_y);
 
     // to make the y axis go from top to bottom, we need to invert it
     y_mapped = constants.effective_height - y_mapped;

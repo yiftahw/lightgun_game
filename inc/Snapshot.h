@@ -26,7 +26,7 @@ Point point_from_string(const std::string &str);
 
 struct Snapshot
 {
-    std::array<Point, snapshot_size> points;
+    std::array<Point, dfrobot_snapshot_size> points;
 
     std::string to_string() const;
 

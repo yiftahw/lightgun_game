@@ -1,3 +1,5 @@
+#include <cerrno>
+#include <cstring>
 #include <thread>
 #include "DataAcqPlayback.h"
 
@@ -8,6 +10,7 @@ DataAcqPlayback::DataAcqPlayback(std::string file_name, uint8_t fps) :
     if (!input.is_open())
     {
         printf("Failed to open file %s\n", file_name.c_str());
+        printf("%s\n", std::strerror(errno));
     }
 }
 
@@ -41,4 +44,9 @@ Snapshot DataAcqPlayback::get()
     }
 
     return snapshot_from_string(line);
+}
+
+bool DataAcqPlayback::is_open()
+{
+    return input.is_open();
 }
