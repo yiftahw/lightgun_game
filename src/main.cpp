@@ -1,33 +1,96 @@
 #include <thread>
 #include <stdio.h>
+#include <cmath>
+#include <fstream>
 #include <iostream>
+#include <tuple>
 #include <SDL2/SDL.h>
 #include "DataAcqHTTP.h"
 #include "screen.h"
 #include "Snapshot.h"
 #include "DataAcqSim.h"
-#include <cmath>
 #include "consts.h"
 #include "PointMapping.h"
 
-int main(int argc, char** argv)
+enum class playback_mode
 {
-    // SDL library uses macros to bypass our main function and it calls our main function
-    // this causes our main function to must have argc and argv parameters
-    // to bypass the "unused parameter" warning from "Werror" flag, we can use this line
-    if (argc == 0 && argv == nullptr) {}
+    CURSOR,
+    DEBUG
+};
 
+// record raw data from the HTTP server
+void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t fps)
+{
+    std::ofstream output(file_name);
+    if (!output.is_open())
+    {
+        printf("Failed to open file %s\n", file_name.c_str());
+        return;
+    }
+
+    while (samples-- > 0)
+    {
+        auto snapshot = data_acq->get();
+        output << snapshot.to_string() << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
+    }
+
+    output.close();
+}
+
+void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playback_mode mode)
+{
+    while (true)
+    {
+        auto snapshot = data_acq->get();
+
+        if (mode == playback_mode::DEBUG)
+        {
+            printf("Snapshot: %s\n", snapshot.to_string().c_str());
+            
+            std::vector<PointF> mapped_points(snapshot_size);
+            for (auto &point : snapshot.points)
+            {
+                auto mapped = map_dfrobot_to_screen(point, constants);
+                mapped_points.push_back(mapped);
+            }
+
+            screen->clear_pixels();
+            for (auto &point : mapped_points)
+            {
+                screen->add_pixel({point.x, point.y});
+            }
+        }
+        else // playback_mode::CURSOR
+        {
+            auto pt = map_snapshot_to_screen(snapshot, constants);
+            if (pt.x == 0 && pt.y == 0)
+            {
+                continue;
+            }
+
+            screen->clear_pixels();
+            screen->add_pixel({pt.x, pt.y});
+        }
+
+        screen->render_screen();
+        screen->input();
+    }
+}
+
+std::tuple<Screen*, screen_constants> init_screen()
+{
     if (0 != SDL_Init(SDL_INIT_VIDEO))
     {
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
-        return -1;
+        return {nullptr, screen_constants(0, 0, 1.0f)};
     }
 
     SDL_DisplayMode dm;
     if (0 != SDL_GetDesktopDisplayMode(0, &dm))
     {
         SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
-        return -1;
+        return {nullptr, screen_constants(0, 0, 1.0f)};
     }
     printf("Display mode: %dx%d\n", dm.w, dm.h);
 
@@ -39,30 +102,31 @@ int main(int argc, char** argv)
     if (screen == nullptr)
     {
         printf("Failed to create screen!\n");
-        return -1;
+        return {nullptr, screen_constants(0, 0, 1.0f)};
     }
 
     screen_constants constants(width, height, 1.0f);
+    return {screen, constants};
+}
+
+
+int main(int argc, char** argv)
+{
+    // SDL library uses macros to bypass our main function and it calls our main function
+    // this causes our main function to must have argc and argv parameters
+    // to bypass the "unused parameter" warning from "Werror" flag, we can use this line
+    if (argc == 0 && argv == nullptr) {}
+
+    auto [screen, constants] = init_screen();
+    if (screen == nullptr)
+    {
+        return -1;
+    }
 
     DataAcqHTTP client("10.100.102.34:80");
-    while (true)
-    {
-        auto snapshot = client.get();
-        auto pt = map_snapshot_to_screen(snapshot, constants);
-        //printf("Snapshot: %s -> %s\n", snapshot.to_string().c_str(), pt.to_string().c_str());
-
-        if (pt.x == 0 && pt.y == 0)
-        {
-            //printf("Invalid point\n");
-            continue;
-        }
-
-        screen->clear_pixels();
-        screen->add_pixel({pt.x, pt.y});
-
-        screen->render_screen();
-        screen->input();
-    }
+    
+    //record(client, screen, "raw_records/record1.txt", 1200, 60);
+    play(&client, screen, constants, playback_mode::DEBUG);
 
     return 0;
 }
