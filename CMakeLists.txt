@@ -38,7 +38,6 @@ set(APP_SRCS
     ${SRC_DIR}/DataAcqHTTP.cpp
     ${SRC_DIR}/DataAcqPlayback.cpp
     ${SRC_DIR}/PointMapping.cpp
-    ${SRC_DIR}/DataAcqSim.cpp
     ${SRC_DIR}/main.cpp)
 
 set(APP_INC_DIRS
