@@ -52,3 +52,8 @@ Snapshot snapshot_from_string(const std::string &input)
 
     return result;
 }
+
+Snapshot Snapshot::invalid()
+{
+    return {Point{1023, 1023}, Point{1023, 1023}, Point{1023, 1023}, Point{1023, 1023}};
+}

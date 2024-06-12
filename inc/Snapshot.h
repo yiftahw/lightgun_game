@@ -29,6 +29,8 @@ struct Snapshot
     std::array<Point, snapshot_size> points;
 
     std::string to_string() const;
+
+    static Snapshot invalid();
 };
 
 Snapshot snapshot_from_string(const std::string& input);
