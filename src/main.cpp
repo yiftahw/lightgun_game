@@ -8,9 +8,9 @@
 #include "DataAcqHTTP.h"
 #include "screen.h"
 #include "Snapshot.h"
-#include "DataAcqSim.h"
 #include "consts.h"
 #include "PointMapping.h"
+#include "DataAcqPlayback.h"
 
 enum class playback_mode
 {
@@ -18,10 +18,17 @@ enum class playback_mode
     DEBUG
 };
 
+enum class data_acq_mode
+{
+    HTTP_RECORD,
+    HTTP_LIVE,
+    PLAYBACK
+};
+
 // record raw data from the HTTP server
 void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t fps)
 {
-    std::ofstream output(file_name);
+    std::ofstream output(file_name, std::ios::out);
     if (!output.is_open())
     {
         printf("Failed to open file %s\n", file_name.c_str());
@@ -32,6 +39,7 @@ void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t
     {
         auto snapshot = data_acq->get();
         output << snapshot.to_string() << std::endl;
+        std::cout << snapshot.to_string() << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
     }
 
@@ -48,7 +56,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playba
         {
             printf("Snapshot: %s\n", snapshot.to_string().c_str());
             
-            std::vector<PointF> mapped_points(snapshot_size);
+            std::vector<PointF> mapped_points(dfrobot_snapshot_size);
             for (auto &point : snapshot.points)
             {
                 auto mapped = map_dfrobot_to_screen(point, constants);
@@ -117,16 +125,38 @@ int main(int argc, char** argv)
     // to bypass the "unused parameter" warning from "Werror" flag, we can use this line
     if (argc == 0 && argv == nullptr) {}
 
-    auto [screen, constants] = init_screen();
-    if (screen == nullptr)
+    data_acq_mode acq_mode = data_acq_mode::HTTP_LIVE;
+    playback_mode cursor_mode = playback_mode::CURSOR;
+
+    IDataAcq *data_acq = nullptr;
+    if (acq_mode == data_acq_mode::PLAYBACK)
     {
-        return -1;
+        auto playback_acq = new DataAcqPlayback("raw_data.txt", 30);
+        if (!playback_acq->is_open())
+        {
+            return -1;
+        }
+        data_acq = playback_acq;
+    }
+    else
+    {
+        data_acq = new DataAcqHTTP("10.100.102.34:80");
     }
 
-    DataAcqHTTP client("10.100.102.34:80");
-    
-    //record(client, screen, "raw_records/record1.txt", 1200, 60);
-    play(&client, screen, constants, playback_mode::DEBUG);
+    if (acq_mode == data_acq_mode::HTTP_RECORD)
+    {
+        record(data_acq, "record.txt", 1200, 60);
+    }
+    else
+    {
+        auto [screen, constants] = init_screen();
+        if (screen == nullptr)
+        {
+            return -1;
+        }
+
+        play(data_acq, screen, constants, cursor_mode);
+    }
 
     return 0;
 }
