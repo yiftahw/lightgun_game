@@ -11,6 +11,7 @@ public:
     ~DataAcqPlayback();
 
     Snapshot get() override;
+    Snapshot get(bool no_sleep);
     bool is_open();
 
 private:

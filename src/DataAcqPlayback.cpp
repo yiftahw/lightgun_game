@@ -22,10 +22,17 @@ DataAcqPlayback::~DataAcqPlayback()
     }
 }
 
-Snapshot DataAcqPlayback::get()
+Snapshot DataAcqPlayback::get(bool no_sleep)
 {
     // to simulate the requested fps, we sleep here
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / fps));
+    // after profiling, the mapping takes around 70 microseconds
+    // so we can sleep for the remaining time
+
+    if (!no_sleep)
+    {
+        auto sleep_time = std::chrono::milliseconds(1000 / fps) - std::chrono::microseconds(70);
+        std::this_thread::sleep_for(sleep_time);
+    }
 
     if (!input.is_open())
     {
@@ -44,6 +51,11 @@ Snapshot DataAcqPlayback::get()
     }
 
     return snapshot_from_string(line);
+}
+
+Snapshot DataAcqPlayback::get()
+{
+    return get(false);
 }
 
 bool DataAcqPlayback::is_open()
