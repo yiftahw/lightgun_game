@@ -59,7 +59,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playba
             std::vector<PointF> mapped_points(dfrobot_snapshot_size);
             for (auto &point : snapshot.points)
             {
-                auto mapped = map_dfrobot_to_screen(point, constants);
+                auto mapped = map_snapshot_debug(point, constants);
                 mapped_points.push_back(mapped);
             }
 
@@ -71,7 +71,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playba
         }
         else // playback_mode::CURSOR
         {
-            auto pt = map_snapshot_to_screen(snapshot, constants);
+            auto pt = map_snapshot_to_cursor(snapshot, constants);
             if (pt.x == 0 && pt.y == 0)
             {
                 continue;
@@ -117,6 +117,34 @@ std::tuple<Screen*, screen_constants> init_screen()
     return {screen, constants};
 }
 
+void profile_run_time(uint32_t cycles)
+{
+    auto start = std::chrono::high_resolution_clock::now();
+
+    DataAcqPlayback playback_acq("raw_data.txt", 30);
+    if (!playback_acq.is_open())
+    {
+        printf("Failed to open file\n");
+        return;
+    }
+    screen_constants constants(2560, 1440, 1.0f);
+
+    for (uint32_t i = 0; i < cycles; i++)
+    {
+        if (i % 100 == 0)
+        {
+            printf("Cycle: %d\n", i);
+        }
+        auto snapshot = playback_acq.get(true);
+        map_snapshot_to_cursor(snapshot, constants); // we don't care about the return value
+    }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    // calculate the average time taken for each cycle
+    printf("Average time taken: %f microseconds\n", float(duration.count()) / cycles);
+}
 
 int main(int argc, char** argv)
 {
