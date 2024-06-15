@@ -37,6 +37,7 @@ set(APP_SRCS
     ${SRC_DIR}/Snapshot.cpp
     ${SRC_DIR}/DataAcqHTTP.cpp
     ${SRC_DIR}/DataAcqPlayback.cpp
+    ${SRC_DIR}/Geometry.cpp
     ${SRC_DIR}/PointMapping.cpp
     ${SRC_DIR}/main.cpp)
 
