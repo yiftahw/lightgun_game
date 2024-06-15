@@ -8,7 +8,7 @@ static inline constexpr uint32_t dfrobot_resolution_x = 128;
 static inline constexpr uint32_t dfrobot_resolution_y = 96;
 static inline constexpr uint32_t dfrobot_max_unit_y = (dfrobot_max_unit_x * dfrobot_resolution_y) / dfrobot_resolution_x;
 
-static inline constexpr uint32_t wii_ir_led_width_cm = 20;
+static inline constexpr float wii_ir_led_width_cm = 20;
 
 static inline constexpr uint32_t inch_in_cm = 2.54;
 
