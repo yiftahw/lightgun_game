@@ -25,6 +25,26 @@ enum class data_acq_mode
     PLAYBACK
 };
 
+std::pair<SDL_FPoint, SDL_FPoint> sdl_segment(const LineSegment &segment)
+{
+    return {{segment.p1.x, segment.p1.y}, {segment.p2.x, segment.p2.y}};
+}
+
+std::pair<SDL_FPoint, SDL_FPoint> sdl_segment(const PointF &p1, const PointF &p2)
+{
+    return {{p1.x, p1.y}, {p2.x, p2.y}};
+}
+
+SDL_FPoint sdl_point(const PointF &point)
+{
+    return {point.x, point.y};
+}
+
+SDL_FPoint sdl_point(const Point &point)
+{
+    return {static_cast<float>(point.x), static_cast<float>(point.y)};
+}
+
 // record raw data from the HTTP server
 void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t fps)
 {
@@ -56,18 +76,52 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playba
         {
             printf("Snapshot: %s\n", snapshot.to_string().c_str());
             
-            std::vector<PointF> mapped_points(dfrobot_snapshot_size);
-            for (auto &point : snapshot.points)
+            // std::vector<PointF> mapped_points(dfrobot_snapshot_size);
+            // for (auto &point : snapshot.points)
+            // {
+            //     auto mapped = map_snapshot_debug(point, constants);
+            //     mapped_points.push_back(mapped);
+            // }
+
+            auto opt_borders = map_snapshot_to_borders(snapshot);
+            if (!opt_borders.has_value())
             {
-                auto mapped = map_snapshot_debug(point, constants);
-                mapped_points.push_back(mapped);
+                continue;
+            }
+            auto borders = opt_borders.value();
+
+            auto corners = calculate_screen_corners(snapshot);
+            if (!corners.has_value())
+            {
+                continue;
             }
 
             screen->clear_pixels();
-            for (auto &point : mapped_points)
+            // for (auto &point : mapped_points)
+            for (auto &point : snapshot.points)
             {
-                screen->add_pixel({point.x, point.y});
+                screen->add_pixel(sdl_point(point));
             }
+            auto& top_left = corners.value().top_left;
+            auto& top_right = corners.value().top_right;
+            auto& bot_left = corners.value().bot_left;
+            auto& bot_right = corners.value().bot_right;
+
+            screen->add_pixel(sdl_point(top_left));
+            screen->add_pixel(sdl_point(top_right));
+            screen->add_pixel(sdl_point(bot_left));
+            screen->add_pixel(sdl_point(bot_right));
+
+            screen->clear_segments();
+            // screen->add_segment(sdl_segment(top_left, top_right));
+            // screen->add_segment(sdl_segment(bot_left, bot_right));
+
+            screen->add_segment(sdl_segment(borders.screen_top_segment));
+            screen->add_segment(sdl_segment(borders.screen_bot_segment));
+            screen->add_segment(sdl_segment(borders.screen_left_segment));
+            screen->add_segment(sdl_segment(borders.screen_right_segment));
+            screen->add_segment(sdl_segment(borders.cursor_horizontal_segment));
+            screen->add_segment(sdl_segment(borders.cursor_vertical_segment));
         }
         else // playback_mode::CURSOR
         {
@@ -159,7 +213,7 @@ int main(int argc, char** argv)
     IDataAcq *data_acq = nullptr;
     if (acq_mode == data_acq_mode::PLAYBACK)
     {
-        auto playback_acq = new DataAcqPlayback("raw_data.txt", 30);
+        auto playback_acq = new DataAcqPlayback("raw_data.txt", 10);
         if (!playback_acq->is_open())
         {
             return -1;
