@@ -3,6 +3,16 @@
 #include <optional>
 #include "Snapshot.h"
 
+class LineSegment
+{
+public:
+    explicit LineSegment(const PointF &p1, const PointF &p2);
+    PointF p1;
+    PointF p2;
+private:
+    LineSegment() = delete;
+};
+
 class Line
 {
 public:

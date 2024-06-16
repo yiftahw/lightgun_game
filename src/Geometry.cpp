@@ -1,5 +1,11 @@
 #include "Geometry.h"
 
+LineSegment::LineSegment(const PointF &p1, const PointF &p2)
+    : p1(p1),
+      p2(p2)
+{
+}
+
 Line::Line()
 {
 }
