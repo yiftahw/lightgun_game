@@ -36,9 +36,19 @@ void Screen::add_pixel(SDL_FPoint point)
     points.push_back(point);
 }
 
+void Screen::add_segment(std::pair<SDL_FPoint, SDL_FPoint> segment)
+{
+    segments.push_back(segment);
+}
+
 void Screen::clear_pixels()
 {
     points.clear();
+}
+
+void Screen::clear_segments()
+{
+    segments.clear();
 }
 
 void Screen::clear_screen()
@@ -52,13 +62,19 @@ void Screen::render_screen()
     clear_screen();
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     //SDL_RenderDrawPointsF(renderer, points.data(), points.size());
-    for (const auto &point : points)
+    
+    for (const auto &segment : segments)
     {
-        // create a rectangle of size 20x20 and fill it with white color
-        SDL_FRect rect = {point.x - 10, point.y - 10, 20, 20};
-        SDL_RenderFillRectF(renderer, &rect);
+        SDL_RenderDrawLineF(renderer, segment.first.x, segment.first.y, segment.second.x, segment.second.y);
     }
 
+    for (const auto &point : points)
+    {
+        // create a rectangle and fill it with white color
+        constexpr float rect_size = 6.0F;
+        SDL_FRect rect = {point.x - (rect_size / 2.0F), point.y - (rect_size / 2.0F), rect_size, rect_size};
+        SDL_RenderFillRectF(renderer, &rect);
+    }
 
     SDL_RenderPresent(renderer);
 }
