@@ -1,10 +1,5 @@
 {
-    "cmake.configureSettings": 
-    {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "MYGAME_VENDORED": "ON",
-        "BUILD_SHARED_LIBS:BOOL": "OFF",
-    },
+    "cmake.buildDirectory": "${workspaceFolder}/build",
     "files.associations": {
         "*.lex": "lex",
         "algorithm": "cpp",

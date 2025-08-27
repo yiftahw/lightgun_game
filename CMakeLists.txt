@@ -5,30 +5,21 @@ project(lightgun_game)
 set(PRJ_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 set(SRC_DIR ${PRJ_ROOT}/src)
 set(INC_DIR ${PRJ_ROOT}/inc)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PRJ_ROOT}/cmake)
 
-# vs code intellisense support
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# c++ revision
-set(CXX_STANDARD 17)
-
-# use flags error, all, extra, pedantic
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
-
-# Create an option to switch between a system sdl library and a vendored sdl library
-option(MYGAME_VENDORED "Use vendored libraries" OFF)
-if(MYGAME_VENDORED)
-    add_subdirectory(vendored/sdl EXCLUDE_FROM_ALL)
-else()
-    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
-    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-
-    # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
-    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+# 3rd party libraries
+option(INSTALL_DEPS "Install dependencies" OFF)
+if(INSTALL_DEPS STREQUAL "ON")
+    include(${PRJ_ROOT}/cmake/get_cpm.cmake)
+    include(${PRJ_ROOT}/cmake/cpr.cmake)
+    include(${PRJ_ROOT}/cmake/sdl2.cmake)
 endif()
 
-# add the cpr library
+# setup
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
+
+find_package(SDL2 REQUIRED COMPONENTS SDL2 SDL2main)
 find_package(cpr REQUIRED)
 
 # define the lightgun_game executable
