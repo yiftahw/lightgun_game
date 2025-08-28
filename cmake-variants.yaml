@@ -25,9 +25,9 @@ installDeps:
       short: InstallDeps On
       long: Enable dependency installation
       settings:
-        INSTALL_DEPS: true
+        INSTALL_DEPS: ON
     off:
       short: InstallDeps Off
       long: Disable dependency installation
       settings:
-        INSTALL_DEPS: false
+        INSTALL_DEPS: OFF

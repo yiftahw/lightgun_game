@@ -10,8 +10,6 @@ static inline constexpr uint32_t dfrobot_max_unit_y = (dfrobot_max_unit_x * dfro
 
 static inline constexpr float wii_ir_led_width_cm = 20;
 
-static inline constexpr uint32_t inch_in_cm = 2.54;
-
 static inline constexpr float screen_scale = 1.0f; // pixels will be drawn at this scale
 
 // screen size constants
