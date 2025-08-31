@@ -22,14 +22,14 @@ file(GLOB SDL2_HEADERS "${SDL2_SOURCE_DIR}/include/*.h")
 
 # Create a target that copies headers at build time, when they change
 add_custom_target(sdl_copy_headers_in_build_dir
-        COMMAND ${CMAKE_COMMAND} -E copy_directory "${SDL2_SOURCE_DIR}/include" "${CMAKE_BINARY_DIR}/SDLHeaders/SDL2"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${SDL2_SOURCE_DIR}/include" "${CMAKE_BINARY_DIR}/_deps/SDLHeaders/SDL2"
         DEPENDS ${SDL2_HEADERS})
 
 # Make SDL depend from it
 add_dependencies(SDL2-static sdl_copy_headers_in_build_dir)
 
 # And add the directory where headers have been copied as an interface include dir
-target_include_directories(SDL2-static INTERFACE "${CMAKE_BINARY_DIR}/SDLHeaders")
+target_include_directories(SDL2-static INTERFACE "${CMAKE_BINARY_DIR}/_deps/SDLHeaders")
 
 set (SDL2_INCLUDE_DIR ${SDL2_SOURCE_DIR}/include)
 
