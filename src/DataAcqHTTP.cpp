@@ -4,14 +4,12 @@
 #include <iostream>
 
 
-DataAcqHTTP::DataAcqHTTP(std::string esp_server_ip)
+DataAcqHTTP::DataAcqHTTP(const std::string &esp_server_ip)
     : esp_server_ip(esp_server_ip)
 {
 }
 
-DataAcqHTTP::~DataAcqHTTP()
-{
-}
+DataAcqHTTP::~DataAcqHTTP() = default;
 
 Snapshot DataAcqHTTP::get()
 {

@@ -10,7 +10,7 @@
 class DataAcqHTTP : public IDataAcq
 {
 public:
-    DataAcqHTTP(std::string esp_server_ip);
+    DataAcqHTTP(const std::string &esp_server_ip);
     ~DataAcqHTTP();
 
     Snapshot get() override;
