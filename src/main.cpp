@@ -6,7 +6,6 @@
 #include <tuple>
 #include <optional>
 #include <cstdlib>
-
 #include <SDL2/SDL.h>
 #include <CLI/CLI.hpp>
 
@@ -16,37 +15,6 @@
 #include "consts.h"
 #include "PointMapping.h"
 #include "DataAcqPlayback.h"
-#include "utils.h"
-
-enum class RenderMode
-{
-    CURSOR,
-    DEBUG,
-};
-std::optional<RenderMode> render_mode_from_string(const std::string &str)
-{
-    static const std::map<std::string, RenderMode> to_string_map {
-        {"cursor", RenderMode::CURSOR},
-        {"debug", RenderMode::DEBUG}
-    };
-    return optional_map_get(to_string_map, str);
-}
-
-enum class AcquisitionMode
-{
-    HTTP_RECORD,
-    HTTP_LIVE,
-    PLAYBACK
-};
-std::optional<AcquisitionMode> data_acq_mode_from_string(const std::string &str)
-{
-    static const std::map<std::string, AcquisitionMode> to_string_map {
-        {"record", AcquisitionMode::HTTP_RECORD},
-        {"live", AcquisitionMode::HTTP_LIVE},
-        {"playback", AcquisitionMode::PLAYBACK}
-    };
-    return optional_map_get(to_string_map, str);
-}
 
 std::pair<SDL_FPoint, SDL_FPoint> sdl_segment(const LineSegment &segment)
 {
@@ -89,13 +57,13 @@ void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t
     output.close();
 }
 
-void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, RenderMode mode)
+void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const bool debug_mode)
 {
     while (true)
     {
         auto snapshot = data_acq->get();
 
-        if (mode == RenderMode::DEBUG)
+        if (debug_mode)
         {
             printf("Snapshot: %s\n", snapshot.to_string().c_str());
             
@@ -225,39 +193,32 @@ void profile_run_time(uint32_t cycles)
 
 int main(int argc, char** argv)
 {
+    // parse CLI arguments
     CLI::App app{"Lightgun Game"};
 
-    std::string mode;
-    app.add_option("-m,--mode", mode, "Data Acquisition Mode")
-        ->check(CLI::IsMember({"live", "record", "playback"}))
-        ->default_val("live");
+    std::string record_directory;
+    app.add_option("-r,--record", record_directory, "Directory path to record data to (will not record if not specified)")
+        ->check(CLI::ExistingDirectory);
+    
+    std::string playback_file_path;
+    app.add_option("-p,--playback", playback_file_path, "File path for playback")
+        ->check(CLI::ExistingFile);
 
-    std::string render_mode;
-    app.add_option("-p,--playback", render_mode, "Render mode")
-        ->check(CLI::IsMember({"cursor", "debug"}))
-        ->default_val("cursor");
+    bool debug_mode = false;
+    app.add_flag("-d,--debug", debug_mode, "Debug rendering mode");
 
     CLI11_PARSE(app, argc, argv);
 
-
-    auto opt_acq_mode = data_acq_mode_from_string(mode);
-    auto opt_render_mode = render_mode_from_string(render_mode);
-
-    if (!opt_acq_mode.has_value() || !opt_render_mode.has_value())
-    {
-        // CLI11 handles validation
-        // this should not happen
-        std::cerr << "Invalid arguments" << std::endl;
-        return EXIT_FAILURE;
-    }
-
+    // construct instances
     IDataAcq *data_acq = nullptr;
-    if (opt_acq_mode.value() == AcquisitionMode::PLAYBACK)
+    if (playback_file_path.length() > 0)
     {
-        auto playback_acq = new DataAcqPlayback("raw_data.txt", 10);
+        // CLI11 asserts that the file exists
+        uint8_t fps = 15;
+        auto playback_acq = new DataAcqPlayback(playback_file_path, fps);
         if (!playback_acq->is_open())
         {
-            return -1;
+            return EXIT_FAILURE;
         }
         data_acq = playback_acq;
     }
@@ -266,8 +227,12 @@ int main(int argc, char** argv)
         data_acq = new DataAcqHTTP("10.100.102.34:80");
     }
 
-    if (opt_acq_mode.value() == AcquisitionMode::HTTP_RECORD)
+    if (record_directory.length() > 0)
     {
+        // CLI11 asserts the directory exists
+
+        // TODO: recording should be unified with the rendering logic,
+        // so they can be used at the same time.
         record(data_acq, "record.txt", 1200, 60);
     }
     else
@@ -275,10 +240,10 @@ int main(int argc, char** argv)
         auto [screen, constants] = init_screen();
         if (screen == nullptr)
         {
-            return -1;
+            return EXIT_FAILURE;
         }
 
-        play(data_acq, screen, constants, opt_render_mode.value());
+        play(data_acq, screen, constants, debug_mode);
     }
 
     return 0;
