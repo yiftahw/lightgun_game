@@ -1,29 +1,52 @@
 #include <thread>
-#include <stdio.h>
+#include <cstdio>
 #include <cmath>
 #include <fstream>
 #include <iostream>
 #include <tuple>
+#include <optional>
+#include <cstdlib>
+
 #include <SDL2/SDL.h>
+#include <CLI/CLI.hpp>
+
 #include "DataAcqHTTP.h"
 #include "screen.h"
 #include "Snapshot.h"
 #include "consts.h"
 #include "PointMapping.h"
 #include "DataAcqPlayback.h"
+#include "utils.h"
 
-enum class playback_mode
+enum class RenderMode
 {
     CURSOR,
-    DEBUG
+    DEBUG,
 };
+std::optional<RenderMode> render_mode_from_string(const std::string &str)
+{
+    static const std::map<std::string, RenderMode> to_string_map {
+        {"cursor", RenderMode::CURSOR},
+        {"debug", RenderMode::DEBUG}
+    };
+    return optional_map_get(to_string_map, str);
+}
 
-enum class data_acq_mode
+enum class AcquisitionMode
 {
     HTTP_RECORD,
     HTTP_LIVE,
     PLAYBACK
 };
+std::optional<AcquisitionMode> data_acq_mode_from_string(const std::string &str)
+{
+    static const std::map<std::string, AcquisitionMode> to_string_map {
+        {"record", AcquisitionMode::HTTP_RECORD},
+        {"live", AcquisitionMode::HTTP_LIVE},
+        {"playback", AcquisitionMode::PLAYBACK}
+    };
+    return optional_map_get(to_string_map, str);
+}
 
 std::pair<SDL_FPoint, SDL_FPoint> sdl_segment(const LineSegment &segment)
 {
@@ -66,13 +89,13 @@ void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t
     output.close();
 }
 
-void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, playback_mode mode)
+void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, RenderMode mode)
 {
     while (true)
     {
         auto snapshot = data_acq->get();
 
-        if (mode == playback_mode::DEBUG)
+        if (mode == RenderMode::DEBUG)
         {
             printf("Snapshot: %s\n", snapshot.to_string().c_str());
             
@@ -202,16 +225,34 @@ void profile_run_time(uint32_t cycles)
 
 int main(int argc, char** argv)
 {
-    // SDL library uses macros to bypass our main function and it calls our main function
-    // this causes our main function to must have argc and argv parameters
-    // to bypass the "unused parameter" warning from "Werror" flag, we can use this line
-    if (argc == 0 && argv == nullptr) {}
+    CLI::App app{"Lightgun Game"};
 
-    data_acq_mode acq_mode = data_acq_mode::HTTP_LIVE;
-    playback_mode cursor_mode = playback_mode::CURSOR;
+    std::string mode;
+    app.add_option("-m,--mode", mode, "Data Acquisition Mode")
+        ->check(CLI::IsMember({"live", "record", "playback"}))
+        ->default_val("live");
+
+    std::string render_mode;
+    app.add_option("-p,--playback", render_mode, "Render mode")
+        ->check(CLI::IsMember({"cursor", "debug"}))
+        ->default_val("cursor");
+
+    CLI11_PARSE(app, argc, argv);
+
+
+    auto opt_acq_mode = data_acq_mode_from_string(mode);
+    auto opt_render_mode = render_mode_from_string(render_mode);
+
+    if (!opt_acq_mode.has_value() || !opt_render_mode.has_value())
+    {
+        // CLI11 handles validation
+        // this should not happen
+        std::cerr << "Invalid arguments" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     IDataAcq *data_acq = nullptr;
-    if (acq_mode == data_acq_mode::PLAYBACK)
+    if (opt_acq_mode.value() == AcquisitionMode::PLAYBACK)
     {
         auto playback_acq = new DataAcqPlayback("raw_data.txt", 10);
         if (!playback_acq->is_open())
@@ -225,7 +266,7 @@ int main(int argc, char** argv)
         data_acq = new DataAcqHTTP("10.100.102.34:80");
     }
 
-    if (acq_mode == data_acq_mode::HTTP_RECORD)
+    if (opt_acq_mode.value() == AcquisitionMode::HTTP_RECORD)
     {
         record(data_acq, "record.txt", 1200, 60);
     }
@@ -237,7 +278,7 @@ int main(int argc, char** argv)
             return -1;
         }
 
-        play(data_acq, screen, constants, cursor_mode);
+        play(data_acq, screen, constants, opt_render_mode.value());
     }
 
     return 0;
