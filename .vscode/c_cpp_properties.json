@@ -3,8 +3,7 @@
         {
             "name": "Lightgun Game",
             "compileCommands": "${workspaceFolder}/build/compile_commands.json",
-            "cStandard": "c17",
-            "cppStandard": "gnu++17"
+            "cppStandard": "c++23"
             
         }
     ],
