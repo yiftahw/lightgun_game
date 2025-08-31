@@ -17,8 +17,9 @@ endif()
 
 # setup
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
 
 find_package(SDL2 REQUIRED COMPONENTS SDL2 SDL2main)
@@ -49,3 +50,9 @@ endif()
 
 # Link to the actual SDL2 library. SDL2::SDL2 is the shared SDL library, SDL2::SDL2-static is the static SDL libarary.
 target_link_libraries(lightgun_game PRIVATE cpr::cpr SDL2::SDL2-static CLI11::CLI11)
+
+# post build, copy raw_data.txt next to the executable to allow playback mode
+add_custom_command(TARGET lightgun_game POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${PRJ_ROOT}/raw_data.txt
+        $<TARGET_FILE_DIR:lightgun_game>)
