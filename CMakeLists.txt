@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.21)
 
+# setup
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
+
 project(lightgun_game)
 
 set(PRJ_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -15,13 +22,6 @@ if(INSTALL_DEPS STREQUAL "ON")
     include(${PRJ_ROOT}/cmake/cli11.cmake)
 endif()
 
-# setup
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -Wpedantic")
-
 find_package(SDL2 REQUIRED COMPONENTS SDL2 SDL2main)
 find_package(cpr REQUIRED)
 find_package(CLI11 REQUIRED)
@@ -29,11 +29,13 @@ find_package(CLI11 REQUIRED)
 # define the lightgun_game executable
 set(APP_SRCS
     ${SRC_DIR}/screen.cpp
+    ${SRC_DIR}/mapping_common.cpp
     ${SRC_DIR}/Snapshot.cpp
     ${SRC_DIR}/DataAcqHTTP.cpp
     ${SRC_DIR}/DataAcqPlayback.cpp
     ${SRC_DIR}/Geometry.cpp
     ${SRC_DIR}/PointMapping.cpp
+    ${SRC_DIR}/LinAlgPointMapping.cpp
     ${SRC_DIR}/main.cpp)
 
 set(APP_INC_DIRS
