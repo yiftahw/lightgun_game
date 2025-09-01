@@ -66,13 +66,6 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
         if (debug_mode)
         {
             printf("Snapshot: %s\n", snapshot.to_string().c_str());
-            
-            // std::vector<PointF> mapped_points(dfrobot_snapshot_size);
-            // for (auto &point : snapshot.points)
-            // {
-            //     auto mapped = map_snapshot_debug(point, constants);
-            //     mapped_points.push_back(mapped);
-            // }
 
             auto opt_borders = map_snapshot_to_borders(snapshot);
             if (!opt_borders.has_value())
@@ -83,7 +76,6 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
             auto corners = borders.corners;
 
             screen->clear_pixels();
-            // for (auto &point : mapped_points)
             for (auto &point : snapshot.points)
             {
                 screen->add_pixel(sdl_point(point));
@@ -99,8 +91,6 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
             screen->add_pixel(sdl_point(bot_right));
 
             screen->clear_segments();
-            // screen->add_segment(sdl_segment(top_left, top_right));
-            // screen->add_segment(sdl_segment(bot_left, bot_right));
 
             screen->add_segment(sdl_segment(borders.screen_top_segment));
             screen->add_segment(sdl_segment(borders.screen_bot_segment));
