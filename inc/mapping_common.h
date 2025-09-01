@@ -17,6 +17,12 @@ struct screen_constants
 
 struct ScreenCorners
 {
+    ScreenCorners(float width, float height)
+        : top_left(0, 0), top_right(width, 0), bot_left(0, height), bot_right(width, height) {}
+
+    ScreenCorners(PointF tl, PointF tr, PointF bl, PointF br)
+        : top_left(tl), top_right(tr), bot_left(bl), bot_right(br) {}
+
     PointF top_left;
     PointF top_right;
     PointF bot_left;

@@ -59,6 +59,13 @@ void record(IDataAcq *data_acq, std::string file_name, uint32_t samples, uint8_t
 
 void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const bool debug_mode)
 {
+    const ScreenCorners screen_corners{
+        PointF{0, 0},
+        PointF{constants.effective_width, 0},
+        PointF{0, constants.effective_height},
+        PointF{constants.effective_width, constants.effective_height}
+    };
+
     while (true)
     {
         auto snapshot = data_acq->get();
@@ -101,7 +108,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
         }
         else // playback_mode::CURSOR
         {
-            auto pt = map_snapshot_to_cursor(snapshot, constants);
+            auto pt = map_snapshot_to_cursor(snapshot, screen_corners);
             if (!pt)
             {
                 continue;
@@ -158,7 +165,7 @@ void profile_run_time(uint32_t cycles)
         printf("Failed to open file\n");
         return;
     }
-    screen_constants constants(2560, 1440, 1.0f);
+    ScreenCorners corners(2560, 1440);
 
     for (uint32_t i = 0; i < cycles; i++)
     {
@@ -167,7 +174,7 @@ void profile_run_time(uint32_t cycles)
             printf("Cycle: %d\n", i);
         }
         auto snapshot = playback_acq.get(true);
-        map_snapshot_to_cursor(snapshot, constants); // we don't care about the return value
+        map_snapshot_to_cursor(snapshot, corners); // we don't care about the return value
     }
 
     auto end = std::chrono::high_resolution_clock::now();

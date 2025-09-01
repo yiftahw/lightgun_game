@@ -24,8 +24,8 @@ struct borders
 };
 
 /** @brief map a dfrobot camera snapshot to a cursor position */
-std::optional<PointF> map_snapshot_to_cursor(const Snapshot &snapshot, const screen_constants &screen_consts);
-
+std::optional<PointF> map_snapshot_to_cursor(const Snapshot &snapshot, const ScreenCorners &screen_corners);
+    
 /** @brief map a point from the dfrobot coordinate system to the screen coordinate system
  * @note this function is used for debugging purposes (Showing the 4 dfrobot points on the screen) */
 PointF map_snapshot_debug(const Point &dfrobot, const screen_constants &screen_consts);

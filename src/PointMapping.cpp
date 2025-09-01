@@ -136,7 +136,7 @@ namespace
                 cursor_vertical};
     }
 
-    PointF map(const Snapshot &snapshot, const screen_constants &screen_consts)
+    PointF map(const Snapshot &snapshot, const ScreenCorners &screen_corners)
     {
         PointF result;
 
@@ -170,21 +170,23 @@ namespace
         float y_percentage = SafeDivide((intersect_left.y - screen_top_left.y), (screen_bot_left.y - screen_top_left.y));
 
         // // calculate the cursor
-        result.x = x_percentage * screen_consts.effective_width;
-        result.y = y_percentage * screen_consts.effective_height;
+        const auto screen_width = screen_corners.top_right.x - screen_corners.top_left.x;
+        const auto screen_height = screen_corners.bot_left.y - screen_corners.top_left.y;
+        result.x = x_percentage * screen_width;
+        result.y = y_percentage * screen_height;
 
         // // invert the y axis
-        result.y = screen_consts.effective_height - result.y;
+        result.y = screen_height - result.y;
 
         return result;
     }
 }
 
-std::optional<PointF> map_snapshot_to_cursor(const Snapshot &snapshot, const screen_constants &screen_consts)
+std::optional<PointF> map_snapshot_to_cursor(const Snapshot &snapshot, const ScreenCorners &screen_corners)
 {
     try
     {
-        return map(snapshot, screen_consts);
+        return map(snapshot, screen_corners);
     }
     catch (const std::exception &e)
     {
