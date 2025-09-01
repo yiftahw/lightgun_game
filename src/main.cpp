@@ -6,6 +6,8 @@
 #include <tuple>
 #include <optional>
 #include <cstdlib>
+#include <format>
+
 #include <SDL2/SDL.h>
 #include <CLI/CLI.hpp>
 
@@ -156,6 +158,33 @@ std::tuple<Screen*, screen_constants> init_screen()
     return {screen, constants};
 }
 
+void profile(IDataAcq *data_acq, int32_t profiling_iterations)
+{
+    using MappingStrategy = std::function<std::optional<PointF>(const Snapshot &, const ScreenCorners &)>;
+    MappingStrategy perspective_transform_mapping = LinAlgPointMapping::map_snapshot_to_cursor;
+    MappingStrategy eucalidian_geometry_mapping = map_snapshot_to_cursor;
+    const ScreenCorners fake_screen(1920, 1080);
+    auto profile_strategy = [data_acq, profiling_iterations, fake_screen](std::string name, MappingStrategy map) {
+        auto total_time_us = 0;
+        for (int32_t i = 0; i < profiling_iterations; i++) {
+            auto snapshot = data_acq->get();
+            auto start = std::chrono::steady_clock::now();
+            if (map(snapshot, fake_screen).has_value()) {
+                auto end = std::chrono::steady_clock::now();
+                total_time_us += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+            }
+        }
+        auto output = std::format("Strategy: {}, iterations: {}, total time: {} us, average time: {} us\n",
+            name, profiling_iterations, total_time_us, total_time_us / profiling_iterations);
+        return output;
+    };
+
+    auto eucalidian_output = profile_strategy("Eucalidian Geometry", eucalidian_geometry_mapping);
+    auto perspective_output = profile_strategy("Perspective Transform", perspective_transform_mapping);
+    printf("%s", eucalidian_output.c_str());
+    printf("%s", perspective_output.c_str());
+}
+
 int main(int argc, char** argv)
 {
     // parse CLI arguments
@@ -172,7 +201,17 @@ int main(int argc, char** argv)
     bool debug_mode = false;
     app.add_flag("-d,--debug", debug_mode, "Debug rendering mode");
 
+    int32_t profiling_iterations = 0;
+    app.add_option("-t,--time", profiling_iterations, "run time profiling for n iterations (only available in playback mode)")
+        ->check(CLI::Range(1, std::numeric_limits<int32_t>::max()));
+
     CLI11_PARSE(app, argc, argv);
+
+    if (profiling_iterations > 0 && playback_file_path.length() == 0)
+    {
+        printf("Time profiling is only supported in playback mode\n");
+        return EXIT_FAILURE;
+    }
 
     // construct instances
     IDataAcq *data_acq = nullptr;
@@ -192,7 +231,11 @@ int main(int argc, char** argv)
         data_acq = new DataAcqHTTP("10.100.102.34:80");
     }
 
-    if (record_directory.length() > 0)
+    if (profiling_iterations)
+    {
+        profile(data_acq, profiling_iterations);
+    }
+    else if (record_directory.length() > 0)
     {
         // CLI11 asserts the directory exists
 
