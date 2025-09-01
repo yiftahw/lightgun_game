@@ -107,7 +107,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
             screen->add_segment(sdl_segment(borders.cursor_horizontal_segment));
             screen->add_segment(sdl_segment(borders.cursor_vertical_segment));
         }
-        else // playback_mode::CURSOR
+        else // cursor
         {
             auto pt = LinAlgPointMapping::map_snapshot_to_cursor(snapshot, screen_corners);
             if (!pt)
@@ -154,35 +154,6 @@ std::tuple<Screen*, screen_constants> init_screen()
 
     screen_constants constants(width, height, 1.0f);
     return {screen, constants};
-}
-
-void profile_run_time(uint32_t cycles)
-{
-    auto start = std::chrono::high_resolution_clock::now();
-
-    DataAcqPlayback playback_acq("raw_data.txt", 30);
-    if (!playback_acq.is_open())
-    {
-        printf("Failed to open file\n");
-        return;
-    }
-    ScreenCorners corners(2560, 1440);
-
-    for (uint32_t i = 0; i < cycles; i++)
-    {
-        if (i % 100 == 0)
-        {
-            printf("Cycle: %d\n", i);
-        }
-        auto snapshot = playback_acq.get(true);
-        map_snapshot_to_cursor(snapshot, corners); // we don't care about the return value
-    }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-
-    // calculate the average time taken for each cycle
-    printf("Average time taken: %f microseconds\n", float(duration.count()) / cycles);
 }
 
 int main(int argc, char** argv)
