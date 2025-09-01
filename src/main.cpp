@@ -102,13 +102,14 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
         else // playback_mode::CURSOR
         {
             auto pt = map_snapshot_to_cursor(snapshot, constants);
-            if (pt.x == 0 && pt.y == 0)
+            if (!pt)
             {
                 continue;
             }
+            const auto &[x, y] = pt.value();
 
             screen->clear_pixels();
-            screen->add_pixel({pt.x, pt.y});
+            screen->add_pixel({x, y});
         }
 
         screen->render_screen();

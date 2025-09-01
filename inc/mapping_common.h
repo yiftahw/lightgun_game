@@ -15,20 +15,12 @@ struct screen_constants
     }
 };
 
-class ScreenCorners
+struct ScreenCorners
 {
-public:
-    explicit ScreenCorners(const PointF &top_left, const PointF &top_right, const PointF &bot_left, const PointF &bot_right);
     PointF top_left;
     PointF top_right;
     PointF bot_left;
     PointF bot_right;
-    std::optional<Line> top;
-    std::optional<Line> bot;
-    std::optional<Line> left;
-    std::optional<Line> right;
-private:
-    ScreenCorners() = delete;
 };
 
 std::optional<ScreenCorners> calculate_screen_corners(const Snapshot &snapshot);

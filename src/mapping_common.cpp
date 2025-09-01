@@ -1,21 +1,14 @@
 #include "mapping_common.h"
 
-ScreenCorners::ScreenCorners(const PointF &top_left, const PointF &top_right, const PointF &bot_left, const PointF &bot_right)
-    : top_left(top_left)
-    , top_right(top_right)
-    , bot_left(bot_left)
-    , bot_right(bot_right)
-    , top(Line::from_points(top_left, top_right))
-    , bot(Line::from_points(bot_left, bot_right))
-    , left(Line::from_points(top_left, bot_left))
-    , right(Line::from_points(top_right, bot_right))
-{
-}
-
 namespace 
 {
     ScreenCorners calculate_corners(const Snapshot &snapshot)
     {
+        if (!snapshot.is_valid())
+        {
+            throw std::runtime_error("Invalid snapshot");
+        }
+
         PointF avg = {0, 0};
         for (const auto &tmp : snapshot.points)
         {

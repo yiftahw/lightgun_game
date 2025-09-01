@@ -22,15 +22,20 @@ namespace
         const PointF &screen_bot_left = corners.bot_left;
         const PointF &screen_bot_right = corners.bot_right;
 
-        if (!corners.top.has_value() || !corners.bot.has_value() || !corners.left.has_value() || !corners.right.has_value())
+        auto opt_top_line = Line::from_points(screen_top_left, screen_top_right);
+        auto opt_bot_line = Line::from_points(screen_bot_left, screen_bot_right);
+        auto opt_left_line = Line::from_points(screen_top_left, screen_bot_left);
+        auto opt_right_line = Line::from_points(screen_top_right, screen_bot_right);
+
+        if (!opt_top_line.has_value() || !opt_bot_line.has_value() || !opt_left_line.has_value() || !opt_right_line.has_value())
         {
             throw std::runtime_error("Failed to calculate the screen border lines");
         }
 
-        const Line &top_line = corners.top.value();
-        const Line &bot_line = corners.bot.value();
-        const Line &left_line = corners.left.value();
-        const Line &right_line = corners.right.value();
+        const Line &top_line = opt_top_line.value();
+        const Line &bot_line = opt_bot_line.value();
+        const Line &left_line = opt_left_line.value();
+        const Line &right_line = opt_right_line.value();
 
         // to compensate for the camera tilt, we need to calculate a slope for the camera mid point which is the "cursor"
         auto compensated_slope = [](
@@ -175,26 +180,17 @@ namespace
     }
 }
 
-PointF map_snapshot_to_cursor(const Snapshot &snapshot, const screen_constants &screen_consts)
+std::optional<PointF> map_snapshot_to_cursor(const Snapshot &snapshot, const screen_constants &screen_consts)
 {
-    PointF point = {0, 0};
-    for (const auto &p : snapshot.points)
-    {
-        if (p.x == 1023 && p.y == 1023) // invalid point
-        {
-            return point;
-        }
-    }
-
     try
     {
-        point = map(snapshot, screen_consts);
+        return map(snapshot, screen_consts);
     }
     catch (const std::exception &e)
     {
         printf("Error: %s\n", e.what());
     }
-    return point;
+    return std::nullopt;
 }
 
 PointF map_snapshot_debug(const Point &point, const screen_constants &constants)
