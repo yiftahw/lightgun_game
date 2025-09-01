@@ -31,6 +31,18 @@ std::string Snapshot::to_string() const
     return str;
 }
 
+bool Snapshot::is_valid() const
+{
+    for (const auto &[x, y] : points)
+    {
+        if ((x == dfrobot_max_unit_x && y == dfrobot_max_unit_x) || x > dfrobot_max_unit_x || y > dfrobot_max_unit_y)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 Snapshot snapshot_from_string(const std::string &input)
 {
     Snapshot result;

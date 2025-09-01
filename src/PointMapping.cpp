@@ -21,23 +21,18 @@ namespace
         const PointF &screen_top_right = corners.top_right;
         const PointF &screen_bot_left = corners.bot_left;
         const PointF &screen_bot_right = corners.bot_right;
-        const Line &top_line = corners.top;
-        const Line &bot_line = corners.bot;
 
-        // calculate the screen vertical line equations
-        auto opt_left_line = Line::from_points(screen_top_left, screen_bot_left);
-        auto opt_right_line = Line::from_points(screen_top_right, screen_bot_right);
-        if (!opt_left_line.has_value() || !opt_right_line.has_value())
+        if (!corners.top.has_value() || !corners.bot.has_value() || !corners.left.has_value() || !corners.right.has_value())
         {
-            throw std::runtime_error("Failed to calculate the screen vertical borders");
+            throw std::runtime_error("Failed to calculate the screen border lines");
         }
 
-        const Line &left_line = opt_left_line.value();
-        const Line &right_line = opt_right_line.value();
+        const Line &top_line = corners.top.value();
+        const Line &bot_line = corners.bot.value();
+        const Line &left_line = corners.left.value();
+        const Line &right_line = corners.right.value();
 
         // to compensate for the camera tilt, we need to calculate a slope for the camera mid point which is the "cursor"
-        constexpr PointF ir_camera_mid = {float(dfrobot_max_unit_x) / 2, float(dfrobot_max_unit_y) / 2};
-
         auto compensated_slope = [](
             const Line &line1,
             const PointF &line1_start,
@@ -69,6 +64,7 @@ namespace
         };
 
         // vertical position compensation
+        constexpr PointF ir_camera_mid = {static_cast<float>(ir_camera_centers[0]), static_cast<float>(ir_camera_centers[1])};
         float horizontal_intersection_slope = compensated_slope(
             top_line, screen_top_left,
             bot_line, screen_bot_left,
@@ -121,6 +117,8 @@ namespace
         LineSegment cursor_vertical(opt_intersect_top.value(), opt_intersect_bot.value());
 
         return {corners,
+                top_line,
+                bot_line,
                 left_line,
                 right_line,
                 horizontal_camera_line,
@@ -141,7 +139,7 @@ namespace
 
         auto &vertical_camera_line = screen_borders.cursor_vertical;
         auto &horizontal_camera_line = screen_borders.cursor_horizontal;
-        auto &bot_line = screen_borders.corners.bot;
+        auto &bot_line = screen_borders.screen_bot;
         auto &left_line = screen_borders.screen_left;
         
         auto &screen_top_left = screen_borders.corners.top_left;

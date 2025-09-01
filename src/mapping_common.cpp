@@ -1,7 +1,14 @@
 #include "mapping_common.h"
 
-ScreenCorners::ScreenCorners(const PointF &top_left, const PointF &top_right, const PointF &bot_left, const PointF &bot_right, const Line &top, const Line &bottom)
-    : top_left(top_left), top_right(top_right), bot_left(bot_left), bot_right(bot_right), top(top), bot(bottom)
+ScreenCorners::ScreenCorners(const PointF &top_left, const PointF &top_right, const PointF &bot_left, const PointF &bot_right)
+    : top_left(top_left)
+    , top_right(top_right)
+    , bot_left(bot_left)
+    , bot_right(bot_right)
+    , top(Line::from_points(top_left, top_right))
+    , bot(Line::from_points(bot_left, bot_right))
+    , left(Line::from_points(top_left, bot_left))
+    , right(Line::from_points(top_right, bot_right))
 {
 }
 
@@ -102,7 +109,7 @@ namespace
         PointF screen_bot_left = {x_bot_left, opt_y_bot_left.value()};
         PointF screen_bot_right = {x_bot_right, opt_y_bot_right.value()};
 
-        return ScreenCorners(screen_top_left, screen_top_right, screen_bot_left, screen_bot_right, top_line, bot_line);
+        return ScreenCorners(screen_top_left, screen_top_right, screen_bot_left, screen_bot_right);
     }
 }
 

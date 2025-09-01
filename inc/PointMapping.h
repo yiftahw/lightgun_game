@@ -8,6 +8,8 @@ struct borders
 {
     ScreenCorners corners;
 
+    Line screen_top;
+    Line screen_bot;
     Line screen_left;
     Line screen_right;
     Line cursor_horizontal;

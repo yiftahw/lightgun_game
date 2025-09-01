@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cstdint>
-
 static inline constexpr uint32_t dfrobot_snapshot_size = 4;
 static inline constexpr uint32_t dfrobot_max_unit_x = 1023; // 10 bit resolution
 static inline constexpr uint32_t dfrobot_resolution_x = 128;
 static inline constexpr uint32_t dfrobot_resolution_y = 96;
 static inline constexpr uint32_t dfrobot_max_unit_y = (dfrobot_max_unit_x * dfrobot_resolution_y) / dfrobot_resolution_x;
+
+static inline constexpr std::array<uint32_t, 2> ir_camera_centers{dfrobot_max_unit_x / 2, dfrobot_max_unit_y / 2};
 
 static inline constexpr float wii_ir_led_width_cm = 20;
 

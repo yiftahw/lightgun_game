@@ -29,8 +29,8 @@ struct Snapshot
     std::array<Point, dfrobot_snapshot_size> points;
 
     std::string to_string() const;
-
     static Snapshot invalid();
+    bool is_valid() const;
 };
 
 Snapshot snapshot_from_string(const std::string& input);

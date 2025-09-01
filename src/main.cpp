@@ -80,12 +80,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
                 continue;
             }
             auto borders = opt_borders.value();
-
-            auto corners = calculate_screen_corners(snapshot);
-            if (!corners.has_value())
-            {
-                continue;
-            }
+            auto corners = borders.corners;
 
             screen->clear_pixels();
             // for (auto &point : mapped_points)
@@ -93,10 +88,10 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
             {
                 screen->add_pixel(sdl_point(point));
             }
-            auto& top_left = corners.value().top_left;
-            auto& top_right = corners.value().top_right;
-            auto& bot_left = corners.value().bot_left;
-            auto& bot_right = corners.value().bot_right;
+            auto& top_left = corners.top_left;
+            auto& top_right = corners.top_right;
+            auto& bot_left = corners.bot_left;
+            auto& bot_right = corners.bot_right;
 
             screen->add_pixel(sdl_point(top_left));
             screen->add_pixel(sdl_point(top_right));
