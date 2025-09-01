@@ -1,5 +1,6 @@
 #include <optional>
 #include <exception>
+#include <format>
 #include "PointMapping.h"
 #include "consts.h"
 #include "SafeDivide.h"
@@ -13,7 +14,7 @@ namespace
         auto opt_corners = calculate_screen_corners(snapshot);
         if (!opt_corners.has_value())
         {
-            throw std::runtime_error("Failed to calculate the screen corners");
+            throw std::runtime_error(std::format("Failed to calculate the screen corners for snapshot {}", snapshot.to_string()));
         }
         const auto &corners = opt_corners.value();
 

@@ -15,6 +15,7 @@
 #include "consts.h"
 #include "PointMapping.h"
 #include "DataAcqPlayback.h"
+#include "LinAlgPointMapping.h"
 
 std::pair<SDL_FPoint, SDL_FPoint> sdl_segment(const LineSegment &segment)
 {
@@ -108,7 +109,7 @@ void play(IDataAcq *data_acq, Screen *screen, screen_constants constants, const 
         }
         else // playback_mode::CURSOR
         {
-            auto pt = map_snapshot_to_cursor(snapshot, screen_corners);
+            auto pt = LinAlgPointMapping::map_snapshot_to_cursor(snapshot, screen_corners);
             if (!pt)
             {
                 continue;
